@@ -171,29 +171,37 @@ router.post("/signin", async (req, res) => {
     let { success, message, data } = await UserService.Exists({
       email: email.trim(),
     });
-
-    if (success) {
-      const isValidPassword = await bcrypt.compare(password, data.password);
-      if (!isValidPassword) {
-        return res.status(400).json({
-          success: false,
-          message: "Passsword not matching",
-          data: null,
-        });
+    if (data.isActive) {
+      if (success) {
+        const isValidPassword = await bcrypt.compare(password, data.password);
+        if (!isValidPassword) {
+          return res.status(400).json({
+            success: false,
+            message: "Passsword not matching",
+            data: null,
+          });
+        }
+        const token = getToken.createToken(data._id, email);
+        const body = {
+          id: data._id,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          token: token,
+        };
+        return res.status(200).json({ success, message, data: body });
+      } else {
+        return res.status(400).json({ success, message, data });
       }
-
-      const token = getToken.createToken(data._id, email);
-      const body = {
-        id: data._id,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        token: token,
-      };
-      return res.status(200).json({ success, message, data: body });
     } else {
-      return res.status(400).json({ success, message, data });
+      return res.status(400).json({
+        success: false,
+        message: "Please verify email address",
+        data: null,
+      });
     }
+
+
   } catch (error) {
     res.status(400).json({ message: error });
   }
