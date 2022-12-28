@@ -362,7 +362,7 @@ module.exports = {
                                         "
                                       >
                                         <a
-                                          href="http://localhost:8080/api/v1/user/verify/${body._id}"
+                                          href="https://chatappbackend.cyclic.app/api/v1/user/verify/${body._id}"
                                           target="_blank"
                                           class="link-white"
                                           style="
