@@ -52,13 +52,12 @@ exports.create = async (user) => {
 exports.Exists = async (where) => {
   try {
     const user = await User.findOne(where);
-
     if (user) {
-      return { success: true, message: responseMessages.userFound, data: user };
+      return { success: true, message: "User Found!", data: user };
     } else {
       return {
         success: false,
-        message: responseMessages.userNotFound,
+        message: "User not found!",
         data: null,
       };
     }
@@ -75,17 +74,16 @@ exports.update = async (params_id, user) => {
   try {
     const options = { new: true };
     const result = await User.findByIdAndUpdate(params_id, user, options);
-
     if (result) {
       return {
         success: true,
-        message: responseMessages.productUpdated,
+        message: "User Updated",
         data: result,
       };
     } else if (!result) {
       return {
         success: false,
-        message: responseMessages.productNotUpdated,
+        message: "User not updated",
         data: null,
       };
     }

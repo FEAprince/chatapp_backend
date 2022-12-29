@@ -171,8 +171,8 @@ router.post("/signin", async (req, res) => {
     let { success, message, data } = await UserService.Exists({
       email: email.trim(),
     });
-    if (data.isActive) {
-      if (success) {
+    if (success) {
+      if (data.isActive) {
         const isValidPassword = await bcrypt.compare(password, data.password);
         if (!isValidPassword) {
           return res.status(400).json({
@@ -184,21 +184,20 @@ router.post("/signin", async (req, res) => {
         const token = getToken.createToken(data._id, email);
         const body = {
           id: data._id,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
           token: token,
+          username: data.username,
+          email: data.email
         };
         return res.status(200).json({ success, message, data: body });
       } else {
-        return res.status(400).json({ success, message, data });
+        return res.status(400).json({
+          success: false,
+          message: "Please verify email address",
+          data: null,
+        });
       }
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: "Please verify email address",
-        data: null,
-      });
+    } else {     
+      return res.status(400).json({ success, message, data });
     }
 
 
@@ -228,7 +227,6 @@ router.put("/:id", async (req, res) => {
       req.params.id,
       req.body
     );
-
     if (success) {
       return res.status(200).json({ success, message, data });
     } else {
