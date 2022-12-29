@@ -6,39 +6,48 @@ const email = require("../../../helper/email");
 
 exports.create = async (user) => {
   try {
-    const existUser = await User.findOne({ email: user.email.trim() });
-    if (existUser != null) {
-      return {
-        success: false,
-        message: "Email-id already used",
-        data: null,
-      };
-    }
-    const salt = await bcrypt.genSalt(10);
-    const encryptedPassword = await bcrypt.hash(String(user.password), salt);
-    const info = new User({
-      userImg: user.userImg,
-      username: user.username,
-      email: user.email,
-      password: encryptedPassword,
+    const existEmail = await User.findOne({ email: user.email.trim() });
+    if (existEmail == null) {
+      const existUser = await User.findOne({ username: user.username });
+      if (existUser == null) {
+        const salt = await bcrypt.genSalt(10);
+        const encryptedPassword = await bcrypt.hash(String(user.password), salt);
+        const info = new User({
+          userImg: user.userImg,
+          username: user.username,
+          email: user.email,
+          password: encryptedPassword,
 
-    });
-
-    const userData = await info.save();
-    const { successMail } = await email.sendForVeriy(userData);
-    if (successMail) {
-      return {
-        success: true,
-        message: "User Register successfully",
-        data: userData,
-      };
+        });
+        const userData = await info.save();
+        const { successMail } = await email.sendForVeriy(userData);
+        if (successMail) {
+          return {
+            success: true,
+            message: "User register successfully",
+            data: userData,
+          };
+        } else {
+          await User.findByIdAndDelete(userData.id);
+          return {
+            success: false,
+            message: "",
+            data: "",
+          };
+        }
+      } else {
+        return {
+          success: false,
+          message: "Username already exists!",
+          data: null,
+        };
+      }
     } else {
-      await User.findByIdAndDelete(userData.id);
       return {
         success: false,
-        message: "",
-        data: "",
-      };
+        message: "User Email already exists!",
+        data: null,
+      };ss
     }
   } catch (error) {
     return {
@@ -148,17 +157,26 @@ exports.Img_update = async (params_id, file, body) => {
 
 exports.softDelete = async (params_id) => {
   try {
-    const result = await User.findByIdAndUpdate(params_id, { isActive: false });
-    if (result) {
-      return {
-        success: true,
-        message: responseMessages.userDeleted,
-        data: result,
-      };
+    const user = await this.Exists({ _id: params_id });
+    if (user.success) {
+      const result = await User.findByIdAndUpdate(params_id, { isActive: false })
+      if (result) {
+        return {
+          success: true,
+          message: "User deleted",
+          data: result,
+        };
+      } else {
+        return {
+          success: false,
+          message: "User not deleted",
+          data: null,
+        };
+      }
     } else {
       return {
         success: false,
-        message: responseMessages.userNotFound,
+        message: "User id not found",
         data: null,
       };
     }

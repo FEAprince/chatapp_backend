@@ -153,7 +153,6 @@ router.get("/verify/:id", async (req, res) => {
 router.post("/signup", userValidator.signup, async (req, res) => {
   try {
     let { success, message, data } = await UserService.create(req.body);
-
     if (success) {
       return res.status(200).json({ success, message, data });
     } else {
@@ -167,7 +166,6 @@ router.post("/signup", userValidator.signup, async (req, res) => {
 router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
-
     let { success, message, data } = await UserService.Exists({
       email: email.trim(),
     });
@@ -196,7 +194,7 @@ router.post("/signin", async (req, res) => {
           data: null,
         });
       }
-    } else {     
+    } else {
       return res.status(400).json({ success, message, data });
     }
 
@@ -259,6 +257,7 @@ router.delete("/:id", async (req, res) => {
     let { success, message, data } = await UserService.softDelete(
       req.params.id
     );
+    // console.log(success)
     if (success) {
       return res.status(200).json({ success, message, data });
     } else {
@@ -296,7 +295,7 @@ router.post("/search", async (req, res) => {
       if (result.length > 0) {
         return res.status(200).json({
           success: true,
-          message: "data found successfully",
+          message: "Data Found Successfully",
           data: result,
         });
       } else {
@@ -315,13 +314,13 @@ router.post("/search", async (req, res) => {
       if (result.length > 0) {
         return res.status(200).json({
           success: true,
-          message: "data found successfully",
+          message: "Data Found Successfully",
           data: result,
         });
       } else {
         return res
           .status(400)
-          .json({ success: false, message: "data  not found", data: [] });
+          .json({ success: false, message: "Data not found", data: [] });
       }
     }
   } catch (error) {

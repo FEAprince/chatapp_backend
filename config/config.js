@@ -14,7 +14,7 @@ module.exports = {
     MONGO_HOST: "cluster0.9zwxwic.mongodb.net",
   },
   emailSubject: {
-    welcome: "Welcome to Chatapp",
+    welcome: "Welcome to FEA Chat App",
     email_Changed: "Your email has been updated",
     password_Changed: "Password updation link",
     order_confirmation: "Order confirmation ",

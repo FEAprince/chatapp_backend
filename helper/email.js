@@ -335,7 +335,11 @@ module.exports = {
                                   Welcome, ${body.username}
                                 </td>
                               </tr>
-                              <tr></tr>
+                              <tr>
+                              <td align="center">
+                              Please Verify USERID: ${body._id}
+                              </td>
+                              </tr>
                               <!-- Button -->
                               <tr>
                                 <td align="center">
