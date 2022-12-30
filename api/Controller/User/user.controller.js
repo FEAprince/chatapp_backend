@@ -35,53 +35,59 @@ router.get("/verify/:id", async (req, res) => {
   }
 });
 
-// router.post("/verifyAndChangePassword/:id", async (req, res) => {
-//   try {
-//     const { confirmPassword } = req.body;
-//     const { success, message, data } = await UserService.Exists({
-//       _id: req.params.id,
-//     });
+router.post("/changePassword/:id", userValidator.changePassword, async (req, res) => {
+  try {
+    const { success, message, data } = await UserService.Exists({
+      _id: req.params.id,
+    });
+    if (success) {
+      const { confirmPassword } = req.body;
+      const { oldPassword } = req.body;
+      const salt = await bcrypt.genSalt(10);
+      const encryptedPassword = await bcrypt.hash(
+        String(confirmPassword),
+        salt
+      );
+      const isValidPassword = await bcrypt.compare(oldPassword, data.password);
+      const newPassword = encryptedPassword;
+      if (isValidPassword) {
+        const updateData = await UserService.update(req.params.id, {
+          password: newPassword,
+        });
+        if (updateData.success) {
+          const userData = await updateData.data;         
+          const { successMail } =
+            await email.sendForPasswordUpdateSuccess(userData);
 
-//     if (success) {
-//       const salt = await bcrypt.genSalt(10);
-//       const encryptedPassword = await bcrypt.hash(
-//         String(confirmPassword),
-//         salt
-//       );
-//       const newPassword = encryptedPassword;
+          if (successMail) {
+            res
+              .status(200)
+              .json({ success: successMail.success, message: "Mail sent!" });
+          } else {
+            res
+              .status(400)
+              .json({ success: successMail.success, message: "Mail not sent!" });
+          }
 
-//       const updateData = await UserService.update(req.params.id, {
-//         password: newPassword,
-//       });
-
-//       if (updateData.success) {
-//         const userData = await updateData.data;
-//         const { successMail, messageMail } =
-//           await email.sendForPasswordUpdateSuccess(userData);
-
-//         if (successMail) {
-//           res
-//             .status(200)
-//             .json({ success: successMail.success, message: messageMail });
-//         } else {
-//           res
-//             .status(400)
-//             .json({ success: successMail.success, message: messageMail });
-//         }
-//       } else {
-//         return res.status(400).json({
-//           success: updated.success,
-//           message: updated.message,
-//           data: updated.data,
-//         });
-//       }
-//     } else {
-//       res.status(400).json({ success, message, data });
-//     }
-//   } catch (error) {
-//     res.status(400).json({ message: error });
-//   }
-// });
+        } else {
+          res
+            .status(400)
+            .json({ success: false, message: "Something went wrong!" });
+        }
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Wrong password enter!",
+          data: {},
+        });
+      }
+    } else {
+      res.status(400).json({ success, message, data });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
+});
 
 // router.post("/forgotPassword", async (req, res) => {
 //   try {
