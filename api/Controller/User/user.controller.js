@@ -288,7 +288,6 @@ router.delete("/:id", async (req, res) => {
     let { success, message, data } = await UserService.softDelete(
       req.params.id
     );
-    // console.log(success)
     if (success) {
       return res.status(200).json({ success, message, data });
     } else {

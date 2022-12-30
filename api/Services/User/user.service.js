@@ -3,6 +3,7 @@ const { responseMessages } = require("../../../helper/responseMessages");
 const pagination = require("../../../helper/pagination");
 const bcrypt = require("bcryptjs");
 const email = require("../../../helper/email");
+const { where } = require("../User/user.modal");
 
 exports.create = async (user) => {
   try {
@@ -107,19 +108,25 @@ exports.update = async (params_id, user) => {
 
 exports.Img_update = async (params_id, file, body) => {
   try {
-    let userInfo = {};
-    if (typeof body.userImg === "string") {
-      userInfo = { ...body, "userImg": body.userImg }
-    } else {
-      userInfo = { ...body, "userImg": file.path }
-    }
+
+    userInfo = { ...body, userImg: file.path }
     const result = await User.findByIdAndUpdate(params_id, userInfo)
     if (result) {
-      return {
-        success: true,
-        message: "User updated successfully",
-        data: userInfo,
-      };
+      const res = await this.Exists({ _id: params_id });
+      if (res) {
+        return {
+          success: true,
+          message: "User updated successfully",
+          data: res.data,
+        };
+      } else {
+        return {
+          success: true,
+          message: res.message,
+          data: {},
+        };
+      }
+
     } else {
       console.error(error);
       return {
@@ -128,23 +135,6 @@ exports.Img_update = async (params_id, file, body) => {
         data: null,
       };
     }
-
-    // const options = { new: true };
-    // const result = await User.findByIdAndUpdate(params_id, user, options);
-
-    // if (result) {
-    //   return {
-    //     success: true,
-    //     message: responseMessages.userUpdated,
-    //     data: result,
-    //   };
-    // } else {
-    //   return {
-    //     success: false,
-    //     message: responseMessages.userNotFound,
-    //     data: null,
-    //   };
-    // }
   } catch (error) {
     return {
       success: false,
