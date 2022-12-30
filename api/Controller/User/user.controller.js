@@ -79,7 +79,7 @@ router.post("/changePassword/:id", async (req, res) => {
       const { successMail } =
         await email.sendForPasswordUpdateSuccess(userData);
 
-      if (successMail) {        
+      if (successMail) {
         res
           .status(200)
           .json({ success: successMail, message: "Mail sent!", data: null });
@@ -305,28 +305,11 @@ router.post("/list", async (req, res) => {
 router.post("/search", async (req, res) => {
   try {
     let searchText = req.body.searchText;
-
-    if (typeof searchText === "number") {
-      const result = await userModal.find({
-        $or: [{ phoneNumber: searchText }],
-      });
-      if (result.length > 0) {
-        return res.status(200).json({
-          success: true,
-          message: "Data Found Successfully",
-          data: result,
-        });
-      } else {
-        return res
-          .status(400)
-          .json({ success: false, message: "data  not found", data: [] });
-      }
-    } else {
+    if (searchText.length > 2) {
       const result = await userModal.find({
         $or: [
-          { firstName: { $regex: ".*" + searchText + ".*", $options: "i" } },
-          { lastName: { $regex: ".*" + searchText + ".*", $options: "i" } },
-          { email: { $regex: ".*" + searchText + ".*", $options: "i" } },
+          { username: { $regex: ".*" + searchText + ".*", $options: "i" } },
+          { email: { $regex: ".*" + searchText + ".*", $options: "i" } }
         ],
       });
       if (result.length > 0) {
@@ -340,7 +323,15 @@ router.post("/search", async (req, res) => {
           .status(400)
           .json({ success: false, message: "Data not found", data: [] });
       }
+    } else {
+      return res.status(400).json({
+        success: true,
+        message: "Data not found!",
+        data: null,
+      });
     }
+
+
   } catch (error) {
     res.status(400).json({ message: error });
   }
