@@ -64,7 +64,7 @@ router.post("/checkPassword/:id", async (req, res) => {
 
 router.post("/changePassword/:id", async (req, res) => {
   try {
-    const { confirmPassword } = req.body;    
+    const { confirmPassword } = req.body;
     const salt = await bcrypt.genSalt(10);
     const encryptedPassword = await bcrypt.hash(
       String(confirmPassword),
@@ -80,18 +80,19 @@ router.post("/changePassword/:id", async (req, res) => {
         await email.sendForPasswordUpdateSuccess(userData);
 
       if (successMail) {
+        console.log(successMail)
         res
           .status(200)
-          .json({ success: successMail.success, message: "Mail sent!" });
+          .json({ success: successMail, message: "Mail sent!", data: null });
       } else {
         res
           .status(400)
-          .json({ success: successMail.success, message: "Mail not sent!" });
+          .json({ success: successMail, message: "Mail not sent!", data: null });
       }
     } else {
       res
         .status(400)
-        .json({ success: false, message: "Something went wrong!" });
+        .json({ success: false, message: "Something went wrong!", data: null });
     }
   } catch (error) {
     res.status(400).json({ message: error });
