@@ -18,8 +18,6 @@ const mongoString =
   "/" +
   CONFIG.mogno.MONGO_DBNAME; //process.env.DATABASE_URL;
 
-
-
 mongoose.connect(mongoString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
