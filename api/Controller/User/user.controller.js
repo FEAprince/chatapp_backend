@@ -3,11 +3,24 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const UserService = require("../../Services/User/user.service");
 const userValidator = require("../../Controller/User/user.validator");
-const CONFIG = require("../../../config/config");
 const getToken = require("../../../helper/authGaurd");
 const email = require("../../../helper/email");
 const userModal = require("../../Services/User/user.modal");
 const path = require('path');
+const User = require("../../Services/User/user.modal");
+const multer = require("multer");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/img/user");
+  },
+  filename: function (req, file, cb) {
+    cb(null, "user-" + Date.now() + "." + file.originalname.split(".")[1]);
+  },
+});
+
+const uploadImg = multer({ storage: storage }).single("userImg");
+
 router.get("/verify/:id", async (req, res) => {
   try {
     const { success, message, data } = await UserService.Exists(req.params._id);
@@ -198,11 +211,11 @@ router.post("/signin", async (req, res) => {
           });
         }
         const token = getToken.createToken(data._id, email);
+
+        const result = await User.findByIdAndUpdate(data._id, { where: { userStatus: "active" } });
         const body = {
-          id: data._id,
           token: token,
-          username: data.username,
-          email: data.email
+          ...result._doc
         };
         return res.status(200).json({ success, message, data: body });
       } else {
@@ -253,7 +266,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", uploadImg, async (req, res) => {
   try {
     let { success, message, data } = await UserService.Img_update(
       req.params.id,

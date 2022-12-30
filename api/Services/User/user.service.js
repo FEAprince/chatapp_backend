@@ -47,7 +47,7 @@ exports.create = async (user) => {
         success: false,
         message: "User Email already exists!",
         data: null,
-      };ss
+      }; ss
     }
   } catch (error) {
     return {
@@ -107,19 +107,18 @@ exports.update = async (params_id, user) => {
 
 exports.Img_update = async (params_id, file, body) => {
   try {
-    let userInfo = { ...body };
+    let userInfo = {};
     if (typeof body.userImg === "string") {
-      userInfo["userImg"] = body.userImg;
+      userInfo = { ...body, "userImg": body.userImg }
     } else {
-      userInfo["userImg"] = file.path;
+      userInfo = { ...body, "userImg": file.path }
     }
-    const result = await User.findByIdAndUpdate(params_id, userInfo);
-
+    const result = await User.findByIdAndUpdate(params_id, userInfo)
     if (result) {
       return {
         success: true,
         message: "User updated successfully",
-        data: result,
+        data: userInfo,
       };
     } else {
       console.error(error);

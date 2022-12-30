@@ -25,6 +25,12 @@ const UserSchema = new Schema(
       default: "",
       trim: true,
     },
+    userStatus: {
+      type: String,
+      default: "away",
+      trim: true,
+      enum: ["active", "away", "donotdisturb"]
+    },
     isActive: {
       type: Boolean,
       default: false,
