@@ -51,7 +51,7 @@ router.post("/checkPassword/:id", async (req, res) => {
       } else {
         res
           .status(400)
-          .json({ success: true, message: "Password not matched", data: null });
+          .json({ success: false, message: "Password not matched", data: null });
       }
 
     } else {
