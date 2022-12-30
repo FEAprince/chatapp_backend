@@ -16,7 +16,7 @@ module.exports = {
   emailSubject: {
     welcome: "Welcome to FEA Chat App",
     email_Changed: "Your email has been updated",
-    password_Changed: "Password updation link",
+    password_Changed: "Password has been updated",
     order_confirmation: "Order confirmation ",
   },
 
