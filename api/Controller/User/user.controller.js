@@ -35,54 +35,63 @@ router.get("/verify/:id", async (req, res) => {
   }
 });
 
-router.post("/changePassword/:id", userValidator.changePassword, async (req, res) => {
+router.post("/checkPassword/:id", async (req, res) => {
   try {
     const { success, message, data } = await UserService.Exists({
       _id: req.params.id,
     });
     if (success) {
-      const { confirmPassword } = req.body;
       const { oldPassword } = req.body;
-      const salt = await bcrypt.genSalt(10);
-      const encryptedPassword = await bcrypt.hash(
-        String(confirmPassword),
-        salt
-      );
       const isValidPassword = await bcrypt.compare(oldPassword, data.password);
-      const newPassword = encryptedPassword;
       if (isValidPassword) {
-        const updateData = await UserService.update(req.params.id, {
-          password: newPassword,
-        });
-        if (updateData.success) {
-          const userData = await updateData.data;         
-          const { successMail } =
-            await email.sendForPasswordUpdateSuccess(userData);
+        res
+          .status(200)
+          .json({ success: true, message: "Password Matched", data: null });
 
-          if (successMail) {
-            res
-              .status(200)
-              .json({ success: successMail.success, message: "Mail sent!" });
-          } else {
-            res
-              .status(400)
-              .json({ success: successMail.success, message: "Mail not sent!" });
-          }
-
-        } else {
-          res
-            .status(400)
-            .json({ success: false, message: "Something went wrong!" });
-        }
       } else {
-        return res.status(400).json({
-          success: false,
-          message: "Wrong password enter!",
-          data: {},
-        });
+        res
+          .status(400)
+          .json({ success: true, message: "Password not matched", data: null });
       }
+
     } else {
       res.status(400).json({ success, message, data });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
+});
+
+router.post("/changePassword/:id", async (req, res) => {
+  try {
+    const { confirmPassword } = req.body;    
+    const salt = await bcrypt.genSalt(10);
+    const encryptedPassword = await bcrypt.hash(
+      String(confirmPassword),
+      salt
+    );
+    const newPassword = encryptedPassword;
+    const updateData = await UserService.update(req.params.id, {
+      password: newPassword,
+    });
+    if (updateData.success) {
+      const userData = await updateData.data;
+      const { successMail } =
+        await email.sendForPasswordUpdateSuccess(userData);
+
+      if (successMail) {
+        res
+          .status(200)
+          .json({ success: successMail.success, message: "Mail sent!" });
+      } else {
+        res
+          .status(400)
+          .json({ success: successMail.success, message: "Mail not sent!" });
+      }
+    } else {
+      res
+        .status(400)
+        .json({ success: false, message: "Something went wrong!" });
     }
   } catch (error) {
     res.status(400).json({ message: error });
