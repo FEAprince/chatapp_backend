@@ -8,8 +8,7 @@ exports.signup = (req, res, next) => {
         userImg: Joi.string(),
         username: Joi.string().required(),
         email: Joi.string().max(50).email({ minDomainSegments: 2 }).required(),
-        password: Joi.string().required(),
-
+        password: Joi.string().required()
       });
 
       let data = schema.validate(req.body);

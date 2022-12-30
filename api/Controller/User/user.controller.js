@@ -7,7 +7,7 @@ const CONFIG = require("../../../config/config");
 const getToken = require("../../../helper/authGaurd");
 const email = require("../../../helper/email");
 const userModal = require("../../Services/User/user.modal");
-
+const path = require('path');
 router.get("/verify/:id", async (req, res) => {
   try {
     const { success, message, data } = await UserService.Exists(req.params._id);
@@ -16,13 +16,16 @@ router.get("/verify/:id", async (req, res) => {
         isActive: true,
       });
       if (updateResponse.success) {
-        res.status(200).json({ ...updateResponse, data: null });
+        res.status(200).sendFile(path.join(__dirname, '../../../emailres.html'));
+
+        // res.status(200).json({ ...updateResponse, data: null });
       } else {
-        res.status(400).json({
-          success: updateResponse.success,
-          message: updateResponse.message,
-          data: updateResponse.data,
-        });
+        res.status(400).sendFile(path.join(__dirname, '../../../emailresnone.html'));
+        // res.status(400).json({
+        //   success: updateResponse.success,
+        //   message: updateResponse.message,
+        //   data: updateResponse.data,
+        // });
       }
     } else {
       res.status(400).json({ success, message, data });
