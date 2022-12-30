@@ -79,8 +79,7 @@ router.post("/changePassword/:id", async (req, res) => {
       const { successMail } =
         await email.sendForPasswordUpdateSuccess(userData);
 
-      if (successMail) {
-        console.log(successMail)
+      if (successMail) {        
         res
           .status(200)
           .json({ success: successMail, message: "Mail sent!", data: null });
