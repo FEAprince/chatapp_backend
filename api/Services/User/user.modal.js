@@ -20,11 +20,6 @@ const UserSchema = new Schema(
       type: String,
       trim: true,
     },
-    refreshToken: {
-      type: String,
-      default: "",
-      trim: true,
-    },
     userStatus: {
       type: String,
       default: "away",

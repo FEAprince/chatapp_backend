@@ -10,6 +10,7 @@ const path = require('path');
 const User = require("../../Services/User/user.modal");
 const multer = require("multer");
 
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "public/img/user");
@@ -281,6 +282,7 @@ router.patch("/:id", uploadImg, async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: error });
   }
+
 });
 
 router.delete("/:id", async (req, res) => {

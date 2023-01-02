@@ -7,6 +7,8 @@ const path = require("path");
 const routes = require("./routes");
 const CONFIG = require("./config/config");
 const port = process.env.PORT || 8080;
+const socketIo = require("socket.io");
+const http = require("http");
 
 const mongoString =
   "mongodb+srv://" +
@@ -16,7 +18,7 @@ const mongoString =
   "@" +
   CONFIG.mogno.MONGO_HOST +
   "/" +
-  CONFIG.mogno.MONGO_DBNAME; //process.env.DATABASE_URL;
+  CONFIG.mogno.MONGO_DBNAME;
 
 mongoose.connect(mongoString, {
   useNewUrlParser: true,
@@ -45,8 +47,25 @@ app.get("/public/img/:folderName/:fileName", async (req, res) => {
   );
 });
 
-routes.initialize(app);
+// const server = http.createServer(app);
+// const io = socketIo(server);
+// let interval;
+// io.on("connection", (socket) => {
+//   console.log("New client connected");
+//   if (interval) {
+//     clearInterval(interval);
+//   }
+//   interval = setInterval(() => getApiAndEmit(socket), 1000);
+//   socket.on("disconnect", () => {
+//     console.log("Client disconnected");
+//     clearInterval(interval);
+//   });
+// });
+// const getApiAndEmit = socket => {
+//   socket.emit("FromAPI");
+// };
 
+routes.initialize(app);
 app.listen(port, () => {
   console.log(`Server Started at ${port}`);
 });
