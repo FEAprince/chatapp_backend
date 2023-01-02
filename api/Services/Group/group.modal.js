@@ -12,15 +12,16 @@ const GroupSchema = new Schema(
       trim: true,
       ref: "user",
     },
-    groupUsers: [
+    groupUser: [
       {
+        _id: false,
         userId: {
-          type: mongoose.Types.ObjectId,       
+          type: mongoose.Types.ObjectId,
           required: true,
           trim: true,
           ref: "user",
         },
-      },
+      }
     ],
     groupImg: {
       type: String,
