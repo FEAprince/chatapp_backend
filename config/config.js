@@ -20,8 +20,5 @@ module.exports = {
     order_confirmation: "Order confirmation ",
   },
 
-  jwt: {
-    JWTSECRETKEY: "BACKEND$frontendarmy@2002",
-    JWTEXPIRY: "1h",
-  },
+  xApiKey: "FDH348JHEW8U3HDF"
 };

@@ -249,7 +249,6 @@ router.get("/:id", async (req, res) => {
 router.put("/:id", uploader.single("userImg"), async (req, res) => {
   try {
     const upload = await cloudinary.v2.uploader.upload(req.file.path);
-    console.log("1")
     if (req.file) {
       let { success, message, data } = await UserService.update(
         req.params.id,
