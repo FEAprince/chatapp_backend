@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const email = require("../../../helper/email");
 const { where } = require("../User/user.modal");
 
-exports.create = async (user) => {
+exports.create = async (user, imgUrl) => {
   try {
     const existEmail = await User.findOne({ email: user.email.trim() });
     if (existEmail == null) {
@@ -14,7 +14,7 @@ exports.create = async (user) => {
         const salt = await bcrypt.genSalt(10);
         const encryptedPassword = await bcrypt.hash(String(user.password), salt);
         const info = new User({
-          userImg: user.userImg,
+          userImg: imgUrl,
           username: user.username,
           email: user.email,
           password: encryptedPassword,
@@ -83,7 +83,13 @@ exports.Exists = async (where) => {
 exports.update = async (params_id, user) => {
   try {
     const options = { new: true };
-    const result = await User.findByIdAndUpdate(params_id, user, options);
+    const salt = await bcrypt.genSalt(10);
+    const encryptedPassword = await bcrypt.hash(String(user.password), salt);
+    let finalBody = {
+      ...user,
+      password: encryptedPassword
+    }
+    const result = await User.findByIdAndUpdate(params_id, finalBody, options);
     if (result) {
       return {
         success: true,
@@ -106,35 +112,48 @@ exports.update = async (params_id, user) => {
   }
 };
 
-exports.Img_update = async (params_id, file, body) => {
+exports.updateWithNoImage = async (params_id, user) => {
   try {
-
-    userInfo = { ...body, userImg: file.path }
-    const result = await User.findByIdAndUpdate(params_id, userInfo)
-    if (result) {
-      const res = await this.Exists({ _id: params_id });
-      if (res) {
+    const options = { new: true };
+    if (user.password) {
+      const salt = await bcrypt.genSalt(10);
+      const encryptedPassword = await bcrypt.hash(String(user.password), salt);
+      let finalBody = {
+        ...user,
+        password: encryptedPassword
+      }
+      const result = await User.findByIdAndUpdate(params_id, finalBody, options);
+      if (result) {
         return {
           success: true,
-          message: "User updated successfully",
-          data: res.data,
+          message: "User Updated",
+          data: result,
         };
-      } else {
+      } else if (!result) {
+        return {
+          success: false,
+          message: "User not updated",
+          data: null,
+        };
+      }
+    } else {
+      const result = await User.findByIdAndUpdate(params_id, user, options);
+      if (result) {
         return {
           success: true,
-          message: res.message,
-          data: {},
+          message: "User Updated",
+          data: result,
+        };
+      } else if (!result) {
+        return {
+          success: false,
+          message: "User not updated",
+          data: null,
         };
       }
 
-    } else {
-      console.error(error);
-      return {
-        success: false,
-        message: "User not  updated ",
-        data: null,
-      };
     }
+
   } catch (error) {
     return {
       success: false,

@@ -2,26 +2,23 @@ const express = require("express");
 const router = express.Router();
 const GroupService = require("../Group/group.service");
 const groupValidator = require("../../Services/Group/group.validator");
-const groupModel = require("../../Services/Group/group.modal")
+const groupModel = require("../../Services/Group/group.modal");
+const cloudinary = require("../../../middleWare/cloudinary");
+// const uploader = require("../../../middleWare/multer");
 
-const path = require('path');
-const multer = require("multer");
-
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/img/groupimg");
-  },
-  filename: function (req, file, cb) {
-    cb(null, "user-" + Date.now() + "." + file.originalname.split(".")[1]);
-  },
-});
-
-const uploadImg = multer({ storage: storage }).single("userImg");
 
 
 router.post("/create", async (req, res) => {
   try {
+    console.log("1")
+
+    // const upload = await cloudinary.v2.uploader.upload(req.body.file.path);
+    // console.log("UPLOADRES", upload)
+    // return res.json({
+    //   success: true,
+    //   file: upload.secure_url,
+    // });
+
     let { success, message, data } = await GroupService.create(req.body);
     if (success) {
       return res.status(200).json({ success, message, data });
@@ -33,7 +30,7 @@ router.post("/create", async (req, res) => {
   }
 });
 
-router.patch("/:id", uploadImg, async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
     let { success, message, data } = await GroupService.Img_update(
       req.params.id,

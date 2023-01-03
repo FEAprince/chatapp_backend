@@ -8,19 +8,9 @@ const email = require("../../../helper/email");
 const userModal = require("../../Services/User/user.modal");
 const path = require('path');
 const User = require("../../Services/User/user.modal");
-const multer = require("multer");
 
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "public/img/user");
-  },
-  filename: function (req, file, cb) {
-    cb(null, "user-" + Date.now() + "." + file.originalname.split(".")[1]);
-  },
-});
-
-const uploadImg = multer({ storage: storage }).single("userImg");
+const cloudinary = require("../../../middleWare/cloudinary");
+const uploader = require("../../../middleWare/multer")
 
 router.get("/verify/:id", async (req, res) => {
   try {
@@ -182,9 +172,14 @@ router.post("/changePassword/:id", async (req, res) => {
 //   }
 // });
 
-router.post("/signup", userValidator.signup, async (req, res) => {
+router.post("/signup", uploader.single("userImg"), async (req, res) => {
   try {
-    let { success, message, data } = await UserService.create(req.body);
+
+    const upload = await cloudinary.v2.uploader.upload(req.file.path);       // return res.json({
+    //   success: true,
+    //   file: upload.secure_url,
+    // });
+    let { success, message, data } = await UserService.create(req.body, upload.secure_url);
     if (success) {
       return res.status(200).json({ success, message, data });
     } else {
@@ -251,27 +246,40 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", uploader.single("userImg"), async (req, res) => {
   try {
-    let { success, message, data } = await UserService.update(
-      req.params.id,
-      req.body
-    );
-    if (success) {
-      return res.status(200).json({ success, message, data });
+    const upload = await cloudinary.v2.uploader.upload(req.file.path);
+    console.log("1")
+    if (req.file) {
+      let { success, message, data } = await UserService.update(
+        req.params.id,
+        { ...req.body, userImg: upload.secure_url }
+      );
+      if (success) {
+        return res.status(200).json({ success, message, data });
+      } else {
+        return res.status(400).json({ success, message, data });
+      }
     } else {
-      return res.status(400).json({ success, message, data });
+      let { success, message, data } = await UserService.update(
+        req.params.id,
+        { ...req.body }
+      );
+      if (success) {
+        return res.status(200).json({ success, message, data });
+      } else {
+        return res.status(400).json({ success, message, data });
+      }
     }
   } catch (error) {
     res.status(400).json({ message: error });
   }
 });
 
-router.patch("/:id", uploadImg, async (req, res) => {
+router.patch("/:id", async (req, res) => {
   try {
-    let { success, message, data } = await UserService.Img_update(
+    let { success, message, data } = await UserService.updateWithNoImage(
       req.params.id,
-      req.file,
       req.body
     );
     if (success) {
@@ -282,7 +290,6 @@ router.patch("/:id", uploadImg, async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: error });
   }
-
 });
 
 router.delete("/:id", async (req, res) => {
