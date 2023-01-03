@@ -19,6 +19,9 @@ module.exports = {
     password_Changed: "Password has been updated",
     order_confirmation: "Order confirmation ",
   },
+  xApiKey: "FDH348JHEW8U3HDF",
 
-  xApiKey: "FDH348JHEW8U3HDF"
+  jwt: {
+    JWTSECRETKEY: "MDJ23423JDFBL34535LKN"
+  },
 };
