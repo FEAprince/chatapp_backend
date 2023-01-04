@@ -3,7 +3,6 @@ const { responseMessages } = require("../../../helper/responseMessages");
 const pagination = require("../../../helper/pagination");
 const bcrypt = require("bcryptjs");
 const email = require("../../../helper/email");
-const { where } = require("../User/user.modal");
 
 exports.create = async (user, imgUrl) => {
   try {
@@ -12,15 +11,16 @@ exports.create = async (user, imgUrl) => {
       const existUser = await User.findOne({ username: user.username });
       if (existUser == null) {
         const salt = await bcrypt.genSalt(10);
-        const encryptedPassword = await bcrypt.hash(String(user.password), salt);
+        const encryptedPassword = await bcrypt.hash(user.password, salt);
+        console.log("1", encryptedPassword)
         const info = new User({
           userImg: imgUrl,
           username: user.username,
           email: user.email,
-          password: encryptedPassword,
-
+          password: encryptedPassword
         });
         const userData = await info.save();
+        console.log("FINALUSER", userData)
         const { successMail } = await email.sendForVeriy(userData);
         if (successMail) {
           return {
@@ -80,28 +80,52 @@ exports.Exists = async (where) => {
   }
 };
 
-exports.update = async (params_id, user) => {
+exports.update = async (params_id, user) => {  
   try {
     const options = { new: true };
     const salt = await bcrypt.genSalt(10);
-    const encryptedPassword = await bcrypt.hash(String(user.password), salt);
-    let finalBody = {
-      ...user,
-      password: encryptedPassword
-    }
-    const result = await User.findByIdAndUpdate(params_id, finalBody, options);
-    if (result) {
-      return {
-        success: true,
-        message: "User Updated",
-        data: result,
-      };
-    } else if (!result) {
-      return {
-        success: false,
-        message: "User not updated",
-        data: null,
-      };
+    // console.log(user.password)
+    if (user.password) {
+      const encryptedPassword = await bcrypt.hash(user.password, salt);
+      const finalBody = {
+        ...user,
+        password: encryptedPassword
+      }
+      const result = await User.findByIdAndUpdate(params_id, finalBody, options);
+      if (result) {
+        const user = await User.findOne({ where: params_id });
+        console.log(user)
+        return {
+          success: true,
+          message: "User Updated",
+          data: result,
+        };
+      } else if (!result) {
+        return {
+          success: false,
+          message: "User not updated",
+          data: null,
+        };
+      }
+    } else {
+      console.log(params_id)
+      const result = await User.findByIdAndUpdate(params_id, user, options);
+      console.log(result)
+      if (result) {
+        const user = await User.findOne({ where: params_id });
+        console.log(user)
+        return {
+          success: true,
+          message: "User Updated",
+          data: result,
+        };
+      } else if (!result) {
+        return {
+          success: false,
+          message: "User not updated",
+          data: null,
+        };
+      }
     }
   } catch (error) {
     return {
@@ -151,9 +175,7 @@ exports.updateWithNoImage = async (params_id, user) => {
           data: null,
         };
       }
-
     }
-
   } catch (error) {
     return {
       success: false,
@@ -221,3 +243,4 @@ exports.list = async (where, datum) => {
     };
   }
 };
+

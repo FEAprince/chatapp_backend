@@ -69,19 +69,20 @@ router.post("/checkPassword/:id", async (req, res) => {
 router.post("/changePassword/:id", async (req, res) => {
   try {
     const { confirmPassword } = req.body;
+    const options = { new: true };
     const salt = await bcrypt.genSalt(10);
     const encryptedPassword = await bcrypt.hash(
       String(confirmPassword),
       salt
     );
-    const newPassword = encryptedPassword;
-    const updateData = await UserService.update(req.params.id, {
-      password: newPassword,
-    });
-    if (updateData.success) {
-      const userData = await updateData.data;
+    const finalBody = {
+      password: encryptedPassword
+    }
+    const result = await User.findByIdAndUpdate(req.params.id, finalBody, options);
+    if (result) {
+      // const userData = await updateData.data;
       const { successMail } =
-        await email.sendForPasswordUpdateSuccess(userData);
+        await email.sendForPasswordUpdateSuccess(result);
 
       if (successMail) {
         res
@@ -175,10 +176,7 @@ router.post("/changePassword/:id", async (req, res) => {
 router.post("/signup", uploader.single("userImg"), async (req, res) => {
   try {
 
-    const upload = await cloudinary.v2.uploader.upload(req.file.path);       // return res.json({
-    //   success: true,
-    //   file: upload.secure_url,
-    // });
+    const upload = await cloudinary.v2.uploader.upload(req.file.path);
     let { success, message, data } = await UserService.create(req.body, upload.secure_url);
     if (success) {
       return res.status(200).json({ success, message, data });
@@ -194,7 +192,7 @@ router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
     let { success, message, data } = await UserService.Exists({
-      email: email.trim(),
+      email: email,
     });
     if (success) {
       if (data.isActive) {
@@ -205,15 +203,15 @@ router.post("/signin", async (req, res) => {
             message: "Passsword not matching",
             data: null,
           });
+        } else {
+          const token = getToken.createToken(data._id, email);
+          // const result = await User.findByIdAndUpdate(data._id, { where: { userStatus: "active" } });
+          const body = {
+            token: token,
+            ...data._doc
+          };
+          return res.status(200).json({ success, message, data: body });
         }
-        const token = getToken.createToken(data._id, email);
-
-        const result = await User.findByIdAndUpdate(data._id, { where: { userStatus: "active" } });
-        const body = {
-          token: token,
-          ...result._doc
-        };
-        return res.status(200).json({ success, message, data: body });
       } else {
         return res.status(400).json({
           success: false,
@@ -277,7 +275,7 @@ router.put("/:id", uploader.single("userImg"), async (req, res) => {
 
 router.patch("/:id", async (req, res) => {
   try {
-    let { success, message, data } = await UserService.updateWithNoImage(
+    let { success, message, data } = await UserService.update(
       req.params.id,
       req.body
     );
