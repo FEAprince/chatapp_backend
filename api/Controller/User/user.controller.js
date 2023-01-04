@@ -2,13 +2,11 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const UserService = require("../../Services/User/user.service");
-const userValidator = require("../../Controller/User/user.validator");
 const getToken = require("../../../helper/authGaurd");
 const email = require("../../../helper/email");
 const userModal = require("../../Services/User/user.modal");
 const path = require('path');
 const User = require("../../Services/User/user.modal");
-
 const cloudinary = require("../../../middleWare/cloudinary");
 const uploader = require("../../../middleWare/multer")
 
@@ -174,8 +172,7 @@ router.post("/changePassword/:id", async (req, res) => {
 // });
 
 router.post("/signup", uploader.single("userImg"), async (req, res) => {
-  try {
-
+  try {    
     const upload = await cloudinary.v2.uploader.upload(req.file.path);
     let { success, message, data } = await UserService.create(req.body, upload.secure_url);
     if (success) {

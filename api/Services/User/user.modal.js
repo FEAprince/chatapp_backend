@@ -24,7 +24,7 @@ const UserSchema = new Schema(
       type: String,
       default: "away",
       trim: true,
-      enum: ["active", "away", "donotdisturb"]
+      enum: ["active", "away", "donotdissturb"]
     },
     isActive: {
       type: Boolean,

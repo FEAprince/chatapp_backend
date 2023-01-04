@@ -12,7 +12,6 @@ exports.create = async (user, imgUrl) => {
       if (existUser == null) {
         const salt = await bcrypt.genSalt(10);
         const encryptedPassword = await bcrypt.hash(user.password, salt);
-        console.log("1", encryptedPassword)
         const info = new User({
           userImg: imgUrl,
           username: user.username,
@@ -20,7 +19,7 @@ exports.create = async (user, imgUrl) => {
           password: encryptedPassword
         });
         const userData = await info.save();
-        console.log("FINALUSER", userData)
+
         const { successMail } = await email.sendForVeriy(userData);
         if (successMail) {
           return {
@@ -80,11 +79,10 @@ exports.Exists = async (where) => {
   }
 };
 
-exports.update = async (params_id, user) => {  
+exports.update = async (params_id, user) => {
   try {
     const options = { new: true };
     const salt = await bcrypt.genSalt(10);
-    // console.log(user.password)
     if (user.password) {
       const encryptedPassword = await bcrypt.hash(user.password, salt);
       const finalBody = {
@@ -94,7 +92,6 @@ exports.update = async (params_id, user) => {
       const result = await User.findByIdAndUpdate(params_id, finalBody, options);
       if (result) {
         const user = await User.findOne({ where: params_id });
-        console.log(user)
         return {
           success: true,
           message: "User Updated",
@@ -108,12 +105,10 @@ exports.update = async (params_id, user) => {
         };
       }
     } else {
-      console.log(params_id)
       const result = await User.findByIdAndUpdate(params_id, user, options);
-      console.log(result)
       if (result) {
         const user = await User.findOne({ where: params_id });
-        console.log(user)
+
         return {
           success: true,
           message: "User Updated",

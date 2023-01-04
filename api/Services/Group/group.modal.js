@@ -27,6 +27,10 @@ const GroupSchema = new Schema(
       type: String,
       trim: true
     },
+    groupDescription: {
+      type: String,
+      trim: true
+    },
     isActive: {
       type: Boolean,
       default: true,

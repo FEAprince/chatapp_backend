@@ -3,17 +3,13 @@ const pagination = require("../../../helper/pagination");
 const Group = require("../../Services/Group/group.modal");
 
 exports.create = async (data, file) => {
+
   try {
-    // console.log(data)
     const groupBody = new Group({
-      groupName: data.groupName,
-      groupAdmin: data.groupAdmin,
-      groupImg: data.groupImg,
-      groupGroup: data.groupGroup,
-      groupUser: data.groupUser
+      ...data
+      , groupImg: file
     });
     const groupData = await groupBody.save();
-    // const { successMail } = await email.sendForVeriy(groupData);
     if (groupData) {
       return {
         success: true,
@@ -124,7 +120,7 @@ exports.softDelete = async (params_id) => {
         return {
           success: true,
           message: "Group deleted",
-          data: result,
+          data: {}
         };
       } else {
         return {

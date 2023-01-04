@@ -4,22 +4,16 @@ const GroupService = require("../Group/group.service");
 const groupValidator = require("../../Services/Group/group.validator");
 const groupModel = require("../../Services/Group/group.modal");
 const cloudinary = require("../../../middleWare/cloudinary");
-// const uploader = require("../../../middleWare/multer");
+const uploader = require("../../../middleWare/multer");
 
-
-
-router.post("/create", async (req, res) => {
+router.post("/create", uploader.single("groupImg"), async (req, res) => {
   try {
-    console.log("1")
-
-    // const upload = await cloudinary.v2.uploader.upload(req.body.file.path);
-    // console.log("UPLOADRES", upload)
-    // return res.json({
-    //   success: true,
-    //   file: upload.secure_url,
-    // });
-
-    let { success, message, data } = await GroupService.create(req.body);
+    const upload = await cloudinary.v2.uploader.upload(req.file.path);
+    const body = {
+      ...req.body,
+      groupUser: JSON.parse(req.body.groupUser)
+    }
+    let { success, message, data } = await GroupService.create(body, upload.secure_url);
     if (success) {
       return res.status(200).json({ success, message, data });
     } else {
@@ -45,7 +39,6 @@ router.patch("/:id", async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: error });
   }
-
 });
 
 router.delete("/:id", async (req, res) => {
@@ -79,6 +72,24 @@ router.post("/list", async (req, res) => {
   }
 });
 
+router.put("/:id", uploader.single("groupImg"), async (req, res) => {
+  try {
+    const upload = await cloudinary.v2.uploader.upload(req.file.path);
+    const body = {
+      ...req.body,
+      groupUser: JSON.parse(req.body.groupUser),
+      groupImg: upload.secure_url
+    }
+    let { success, message, data } = await GroupService.update(req.params.id, body);
+    if (success) {
+      return res.status(200).json({ success, message, data });
+    } else {
+      return res.status(400).json({ success, message, data });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
+});
 router.post("/search", async (req, res) => {
   try {
     let searchText = req.body.searchText;
