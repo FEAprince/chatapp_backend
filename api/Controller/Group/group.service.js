@@ -73,11 +73,9 @@ exports.update = async (params_id, group) => {
   }
 };
 
-exports.Img_update = async (params_id, file, body) => {
+exports.withoutImgUpdate = async (params_id, body) => {
   try {
-
-    groupInfo = { ...body, groupImg: file.path }
-    const result = await Group.findByIdAndUpdate(params_id, groupInfo)
+    const result = await Group.findByIdAndUpdate(params_id, body)
     if (result) {
       const res = await this.Exists({ _id: params_id });
       if (res) {

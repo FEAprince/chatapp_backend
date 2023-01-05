@@ -24,22 +24,7 @@ router.post("/create", uploader.single("groupImg"), async (req, res) => {
   }
 });
 
-router.patch("/:id", async (req, res) => {
-  try {
-    let { success, message, data } = await GroupService.Img_update(
-      req.params.id,
-      req.file,
-      req.body
-    );
-    if (success) {
-      return res.status(200).json({ success, message, data });
-    } else {
-      return res.status(400).json({ success, message, data });
-    }
-  } catch (error) {
-    res.status(400).json({ message: error });
-  }
-});
+
 
 router.delete("/:id", async (req, res) => {
   try {
@@ -90,13 +75,27 @@ router.put("/:id", uploader.single("groupImg"), async (req, res) => {
     res.status(400).json({ message: error });
   }
 });
+
+router.patch("/:id", async (req, res) => {
+  try {
+    let { success, message, data } = await GroupService.withoutImgUpdate(req.params.id, req.body);
+    if (success) {
+      return res.status(200).json({ success, message, data });
+    } else {
+      return res.status(400).json({ success, message, data });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
+});
+
 router.post("/search", async (req, res) => {
   try {
     let searchText = req.body.searchText;
     if (searchText.length > 2) {
       const result = await groupModel.find({
         $or: [
-          { groupName: { $regex: ".*" + searchText + ".*", $options: "i" } }
+          { groupName: { $regex: ".*" + searchText + ".*", $options: "i" }, isActive: true }
         ],
 
       }).populate(["groupAdmin", "groupUser.userId"]);
