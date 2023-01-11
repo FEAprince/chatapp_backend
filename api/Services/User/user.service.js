@@ -95,7 +95,7 @@ exports.update = async (params_id, user) => {
         return {
           success: true,
           message: "User Updated",
-          data: result,
+          data: user,
         };
       } else if (!result) {
         return {
@@ -239,3 +239,38 @@ exports.list = async (where, datum) => {
   }
 };
 
+exports.hardDelete = async (params_id) => {
+  try {
+    const user = await this.Exists({ _id: params_id });
+    if (user.success) {
+      console.log("1")
+      const result = await User.deleteOne({ _id: params_id });
+      console.log("res", result)
+      if (result) {
+        return {
+          success: true,
+          message: "User deleted",
+          data: result,
+        };
+      } else {
+        return {
+          success: false,
+          message: "User not deleted",
+          data: null,
+        };
+      }
+    } else {
+      return {
+        success: false,
+        message: "User id not found",
+        data: null,
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error,
+      data: null,
+    };
+  }
+};

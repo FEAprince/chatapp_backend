@@ -3,11 +3,10 @@ const pagination = require("../../../helper/pagination");
 const Group = require("../../Services/Group/group.modal");
 
 exports.create = async (data, file) => {
-
   try {
     const groupBody = new Group({
-      ...data
-      , groupImg: file
+      ...data,
+      groupImg: file,
     });
     const groupData = await groupBody.save();
     if (groupData) {
@@ -75,7 +74,7 @@ exports.update = async (params_id, group) => {
 
 exports.withoutImgUpdate = async (params_id, body) => {
   try {
-    const result = await Group.findByIdAndUpdate(params_id, body)
+    const result = await Group.findByIdAndUpdate(params_id, body);
     if (result) {
       const res = await this.Exists({ _id: params_id });
       if (res) {
@@ -91,7 +90,6 @@ exports.withoutImgUpdate = async (params_id, body) => {
           data: {},
         };
       }
-
     } else {
       console.error(error);
       return {
@@ -113,12 +111,14 @@ exports.softDelete = async (params_id) => {
   try {
     const group = await this.Exists({ _id: params_id });
     if (group.success) {
-      const result = await Group.findByIdAndUpdate(params_id, { isActive: false })
+      const result = await Group.findByIdAndUpdate(params_id, {
+        isActive: false,
+      });
       if (result) {
         return {
           success: true,
           message: "Group deleted",
-          data: {}
+          data: {},
         };
       } else {
         return {
@@ -145,9 +145,12 @@ exports.softDelete = async (params_id) => {
 
 exports.list = async (where, datum) => {
   try {
-    const respose = await pagination.list(Group, where, datum,
-      ["groupAdmin", "groupUser.userId"]);
+    const respose = await pagination.list(Group, where, datum, [
+      
+      "groupAdmin"
+    ]);
     if (respose) {
+      console.log("1");
       return {
         success: true,
         message: responseMessages.dataFound,

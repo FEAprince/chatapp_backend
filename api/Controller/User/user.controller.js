@@ -5,10 +5,10 @@ const UserService = require("../../Services/User/user.service");
 const getToken = require("../../../helper/authGaurd");
 const email = require("../../../helper/email");
 const userModal = require("../../Services/User/user.modal");
-const path = require('path');
+const path = require("path");
 const User = require("../../Services/User/user.modal");
 const cloudinary = require("../../../middleWare/cloudinary");
-const uploader = require("../../../middleWare/multer")
+const uploader = require("../../../middleWare/multer");
 
 router.get("/verify/:id", async (req, res) => {
   try {
@@ -18,11 +18,15 @@ router.get("/verify/:id", async (req, res) => {
         isActive: true,
       });
       if (updateResponse.success) {
-        res.status(200).sendFile(path.join(__dirname, '../../../emailres.html'));
+        res
+          .status(200)
+          .sendFile(path.join(__dirname, "../../../emailres.html"));
 
         // res.status(200).json({ ...updateResponse, data: null });
       } else {
-        res.status(400).sendFile(path.join(__dirname, '../../../emailresnone.html'));
+        res
+          .status(400)
+          .sendFile(path.join(__dirname, "../../../emailresnone.html"));
         // res.status(400).json({
         //   success: updateResponse.success,
         //   message: updateResponse.message,
@@ -49,13 +53,13 @@ router.post("/checkPassword/:id", async (req, res) => {
         res
           .status(200)
           .json({ success: true, message: "Password Matched", data: null });
-
       } else {
-        res
-          .status(400)
-          .json({ success: false, message: "Password not matched", data: null });
+        res.status(400).json({
+          success: false,
+          message: "Password not matched",
+          data: null,
+        });
       }
-
     } else {
       res.status(400).json({ success, message, data });
     }
@@ -69,27 +73,29 @@ router.post("/changePassword/:id", async (req, res) => {
     const { confirmPassword } = req.body;
     const options = { new: true };
     const salt = await bcrypt.genSalt(10);
-    const encryptedPassword = await bcrypt.hash(
-      String(confirmPassword),
-      salt
-    );
+    const encryptedPassword = await bcrypt.hash(String(confirmPassword), salt);
     const finalBody = {
-      password: encryptedPassword
-    }
-    const result = await User.findByIdAndUpdate(req.params.id, finalBody, options);
+      password: encryptedPassword,
+    };
+    const result = await User.findByIdAndUpdate(
+      req.params.id,
+      finalBody,
+      options
+    );
     if (result) {
       // const userData = await updateData.data;
-      const { successMail } =
-        await email.sendForPasswordUpdateSuccess(result);
+      const { successMail } = await email.sendForPasswordUpdateSuccess(result);
 
       if (successMail) {
         res
           .status(200)
           .json({ success: successMail, message: "Mail sent!", data: null });
       } else {
-        res
-          .status(400)
-          .json({ success: successMail, message: "Mail not sent!", data: null });
+        res.status(400).json({
+          success: successMail,
+          message: "Mail not sent!",
+          data: null,
+        });
       }
     } else {
       res
@@ -172,16 +178,29 @@ router.post("/changePassword/:id", async (req, res) => {
 // });
 
 router.post("/signup", uploader.single("userImg"), async (req, res) => {
-  try {    
-    const upload = await cloudinary.v2.uploader.upload(req.file.path);
-    let { success, message, data } = await UserService.create(req.body, upload.secure_url);
-    if (success) {
-      return res.status(200).json({ success, message, data });
+  try {
+    if (req.file) {
+      const upload = await cloudinary.v2.uploader.upload(req.file.path);
+      let { success, message, data } = await UserService.create(
+        req.body,
+        upload.secure_url
+      );
+      if (success) {
+        return res.status(200).json({ success, message, data });
+      } else {
+        return res.status(400).json({ success, message, data });
+      }
     } else {
-      return res.status(400).json({ success, message, data });
+      return res.status(400).json({
+        success: false,
+        message: "Upload User Profile Image!",
+        data: {},
+      });
     }
   } catch (error) {
-    res.status(400).json({ message: error });
+    res
+      .status(501)
+      .json({ success: false, message: "Something went wrong!", data: {} });
   }
 });
 
@@ -205,7 +224,7 @@ router.post("/signin", async (req, res) => {
           // const result = await User.findByIdAndUpdate(data._id, { where: { userStatus: "active" } });
           const body = {
             token: token,
-            ...data._doc
+            ...data._doc,
           };
           return res.status(200).json({ success, message, data: body });
         }
@@ -219,8 +238,6 @@ router.post("/signin", async (req, res) => {
     } else {
       return res.status(400).json({ success, message, data });
     }
-
-
   } catch (error) {
     res.status(400).json({ message: error });
   }
@@ -243,27 +260,40 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", uploader.single("userImg"), async (req, res) => {
   try {
-    const upload = await cloudinary.v2.uploader.upload(req.file.path);
     if (req.file) {
-      let { success, message, data } = await UserService.update(
-        req.params.id,
-        { ...req.body, userImg: upload.secure_url }
-      );
-      if (success) {
-        return res.status(200).json({ success, message, data });
+      const upload = await cloudinary.v2.uploader.upload(req.file.path);
+      if (req.file) {
+        let { success, message, data } = await UserService.update(
+          req.params.id,
+          {
+            ...req.body,
+            userImg: upload.secure_url,
+          }
+        );
+        if (success) {
+          return res.status(200).json({ success, message, data });
+        } else {
+          return res.status(400).json({ success, message, data });
+        }
       } else {
-        return res.status(400).json({ success, message, data });
+        let { success, message, data } = await UserService.update(
+          req.params.id,
+          {
+            ...req.body,
+          }
+        );
+        if (success) {
+          return res.status(200).json({ success, message, data });
+        } else {
+          return res.status(400).json({ success, message, data });
+        }
       }
     } else {
-      let { success, message, data } = await UserService.update(
-        req.params.id,
-        { ...req.body }
-      );
-      if (success) {
-        return res.status(200).json({ success, message, data });
-      } else {
-        return res.status(400).json({ success, message, data });
-      }
+      return res.status(400).json({
+        success: false,
+        message: "Upload User Profile Image!",
+        data: {},
+      });
     }
   } catch (error) {
     res.status(400).json({ message: error });
@@ -324,7 +354,7 @@ router.post("/search", async (req, res) => {
       const result = await userModal.find({
         $or: [
           { username: { $regex: ".*" + searchText + ".*", $options: "i" } },
-          { email: { $regex: ".*" + searchText + ".*", $options: "i" } }
+          { email: { $regex: ".*" + searchText + ".*", $options: "i" } },
         ],
       });
       if (result.length > 0) {
@@ -345,11 +375,23 @@ router.post("/search", async (req, res) => {
         data: null,
       });
     }
-
-
   } catch (error) {
     res.status(400).json({ message: error });
   }
 });
 
+// router.delete("/:id", async (req, res) => {
+//   try {
+//     let { success, message, data } = await UserService.hardDelete(
+//       req.params.id
+//     );
+//     if (success) {
+//       return res.status(200).json({ success, message, data });
+//     } else {
+//       return res.status(400).json({ success, message, data });
+//     }
+//   } catch (error) {
+//     res.status(400).json({ message: error });
+//   }
+// });
 module.exports = router;

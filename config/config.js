@@ -17,10 +17,8 @@ module.exports = {
     welcome: "Welcome to FEA Chat App",
     email_Changed: "Your email has been updated",
     password_Changed: "Password has been updated",
-    order_confirmation: "Order confirmation ",
   },
   xApiKey: "FDH348JHEW8U3HDF",
-
   jwt: {
     JWTSECRETKEY: "MDJ23423JDFBL34535LKN",
     JWTEXPIRY: "1h"
